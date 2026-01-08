@@ -111,11 +111,23 @@ body{ background: var(--bg) !important; color: var(--text) !important; }
 }
 .cocktail h3{ margin-top: 0; }
   /* ===== GLOBAL READABILITY FIX ===== */
-h1, h2, h3, summary {
-  color: #111 !important;
+h1, h2, h3, summary, summary .title, .toc a {
+  color: var(--text) !important;
   opacity: 1 !important;
-  font-weight: 600;
+  font-weight: 700 !important;
 }
+.tag{
+  background: color-mix(in srgb, var(--card) 85%, transparent) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+.notes textarea{
+  background: #ffffff !important;
+  color: #111 !important;
+  border: 1px solid #dcdcdc !important;
+}
+
 
 /* ===== REMOVE BLACK HIGHLIGHT TAGS ===== */
 .badge, .tag, span[class*="tag"], span[class*="pill"] {
