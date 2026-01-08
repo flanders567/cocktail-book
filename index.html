@@ -1,0 +1,2319 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Cocktail Book V2 — Notes + Condensed Milk Additions</title>
+<style>
+  :root { --bg:#0f1115; --card:#161922; --ink:#e9ecf1; --muted:#aab2c0; --accent:#79c4ff; --ok:#9be59b; --danger:#ff7a7a; --border:#262b36; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;line-height:1.45}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px}
+  h1{font-size:1.6rem;margin:0 0 8px}
+  p.lead{color:var(--muted);margin:0 0 16px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}
+  button{background:var(--card);color:var(--ink);border:1px solid var(--border);padding:10px 12px;border-radius:10px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  .toc{display:grid;grid-template-columns:repeat(3,1fr); gap:8px;margin:12px 0 20px}
+  .toc a{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--border);padding:10px 12px;border-radius:10px}
+  .toc a:hover{border-color:var(--accent)}
+  details.spirit{background:var(--card);border:1px solid var(--border);border-radius:14px;margin:12px 0;padding:8px}
+  summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:6px 4px}
+  summary .title{font-weight:700;letter-spacing:.3px}
+  summary .count{color:var(--muted);font-size:.9rem}
+  .cocktails{padding:8px 4px 4px 4px}
+  .cocktail{border-top:1px dashed var(--border);padding:12px 4px; display:flex; gap:10px; align-items:flex-start}
+  .cocktail:first-child{border-top:none}
+  .trybox{flex:0 0 auto; padding-top:4px}
+  .trybox input{width:20px;height:20px}
+  .entry{flex:1 1 auto}
+  .entry h3{margin:0 0 6px;font-size:1.05rem}
+  .meta{display:flex; gap:6px; flex-wrap:wrap; margin:0 0 8px}
+  .tag{background:#1f2430;border:1px solid var(--border);color:var(--muted);font-size:.78rem;padding:2px 8px;border-radius:999px}
+  .ing, .method{margin:0 0 8px}
+  .method strong{color:var(--accent)}
+  .notes{margin:8px 0}
+  .notes textarea{width:100%;min-height:64px;background:#111420;color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px;resize:vertical}
+  .actions{display:flex; gap:8px; flex-wrap:wrap;margin-top:6px}
+  .actions button{font-size:.85rem}
+  .delete{border:1px solid #3a1e22;background:#1e1517;color:#ffb0b0;border-radius:10px;padding:8px 10px}
+  .delete:hover{border-color:var(--danger)}
+  .small{font-size:.9rem;color:var(--muted)}
+  footer{margin:24px 0 12px;color:var(--muted);font-size:.85rem;text-align:center}
+</style>
+<style>
+/* --- V2 Modern UI (non-destructive) --- */
+:root{
+  --bg: #f6f7f9;
+  --card: rgba(255,255,255,.92);
+  --text: #111;
+  --muted: rgba(0,0,0,.65);
+  --border: rgba(0,0,0,.10);
+  --shadow: 0 10px 30px rgba(0,0,0,.08);
+  --radius: 18px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0f1115;
+    --card: rgba(22,24,29,.85);
+    --text: rgba(255,255,255,.92);
+    --muted: rgba(255,255,255,.62);
+    --border: rgba(255,255,255,.12);
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+}
+body{ background: var(--bg) !important; color: var(--text) !important; }
+#v2-topbar{
+  position: sticky; top: 0; z-index: 9999;
+  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 14px;
+  margin: -16px -16px 14px -16px;
+}
+#v2-topbar h1{ margin: 0 0 10px 0; font-size: 20px; letter-spacing: .2px; }
+#v2-search{
+  width: 100%; border: 1px solid var(--border); background: var(--card);
+  border-radius: 14px; padding: 11px 12px; font-size: 16px; color: var(--text);
+  outline: none;
+}
+#v2-search:focus{ box-shadow: 0 0 0 3px color-mix(in srgb, #5b9cff 35%, transparent); }
+#v2-meta-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px; color: var(--muted); font-size: 13px; }
+#v2-chip{ padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; background: color-mix(in srgb, var(--card) 75%, transparent); }
+#v2-tried-panel{
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+  margin: 0 0 16px 0;
+}
+#v2-tried-panel summary{ cursor: pointer; font-weight: 700; }
+#v2-tried-empty{ color: var(--muted); margin-top: 8px; }
+#v2-tried-list{ margin: 8px 0 0 18px; }
+#v2-tried-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+.v2-btn{
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+.v2-btn:active{ transform: scale(.99); }
+.cocktail{
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--card) !important;
+  box-shadow: var(--shadow) !important;
+}
+.cocktail h3{ margin-top: 0; }
+</style></head>
+<body>
+<div id="v2-topbar">
+<h1>Cocktail Book V2</h1>
+<input id="v2-search" placeholder="Search drinks, ingredients, notes…" type="search"/>
+<div id="v2-meta-row">
+<span id="v2-chip">Showing <span id="v2-visible">0</span> of <span id="v2-total">0</span></span>
+<span class="v2-hint">Tip: search works across names + recipe text.</span>
+</div>
+</div>
+<div id="v2-tried-panel">
+<details open="">
+<summary>Tried Drinks (<span id="v2-tried-count">0</span>)</summary>
+<div id="v2-tried-empty">No drinks marked as tried yet.</div>
+<ul id="v2-tried-list"></ul>
+<div id="v2-tried-actions">
+<button class="v2-btn" id="v2-clear-tried" type="button">Clear tried</button>
+<button class="v2-btn" id="v2-show-tried" type="button">Show only tried</button>
+<button class="v2-btn" id="v2-show-all" type="button">Show all</button>
+</div>
+</details>
+</div>
+
+<div class="wrap">
+<h1>🍸 Cocktail Book V2 — Notes + Condensed Milk Additions</h1>
+<p class="lead">Base-only (no cross-spirit duplicates). Tap a spirit to expand. ✅ Tried, 🗒️ Notes, and 🗑️ Delete all save locally on this device.</p>
+<div class="toolbar">
+<button id="expandAll">Expand all</button>
+<button id="collapseAll">Collapse all</button>
+<button id="resetTried">Reset tried</button>
+<button id="restoreAll">Restore deleted</button>
+</div>
+<div class="toc">
+<a href="#spirit-cachaca">Cachaça</a>
+<a href="#spirit-tequila">Tequila</a>
+<a href="#spirit-triplesec">Triple Sec (Base-Forward)</a>
+<a href="#spirit-jameson">Jameson (Irish Whiskey)</a>
+<a href="#spirit-aperol">Aperol (Aperol-Forward)</a>
+<a href="#spirit-sweetvermouth">Sweet Vermouth (Vermouth-Forward)</a>
+</div>
+<details class="spirit" id="spirit-cachaca">
+<summary><span class="title">🔽 Cachaça</span><span class="count small">21 drinks</span></summary>
+<div class="cocktails">
+<div class="cocktail" data-id="cachaca-caipirinha" id="cachaca-caipirinha">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Caipirinha</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cracked</span>
+<span class="tag">Build/Muddle</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, ½ lime (quartered), 2 tsp sugar</p>
+<p class="method"><strong>Method:</strong> In a rocks glass, muddle lime with sugar until juicy. Fill with cracked ice, add cachaça, stir. Garnish with lime wheel.</p>
+<div class="notes">
+<label class="small" for="cachaca-caipirinha-notes">Notes</label>
+<textarea id="cachaca-caipirinha-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-caipifruta" id="cachaca-caipifruta">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Caipifruta</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cracked</span>
+<span class="tag">Muddle/Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, ½ lime (optional), 2 tsp sugar, 4–6 pcs fresh fruit (strawberry, kiwi, pineapple, etc.)</p>
+<p class="method"><strong>Method:</strong> Muddle fruit and sugar (and lime if using). Add cracked ice, pour cachaça, stir to integrate. Garnish with matching fruit.</p>
+<div class="notes">
+<label class="small" for="cachaca-caipifruta-notes">Notes</label>
+<textarea id="cachaca-caipifruta-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-batida-coco" id="cachaca-batida-coco">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Batida de Coco</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 2 oz coconut milk, 1 oz sweetened condensed milk, ½ oz simple</p>
+<p class="method"><strong>Method:</strong> Shake hard with ice until frothy. Strain over crushed ice. Garnish with lime or toasted coconut.</p>
+<div class="notes">
+<label class="small" for="cachaca-batida-coco-notes">Notes</label>
+<textarea id="cachaca-batida-coco-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-batida-maracuja" id="cachaca-batida-maracuja">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Batida de Maracujá</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 1½ oz passion fruit purée/juice, 1 oz sweetened condensed milk</p>
+<p class="method"><strong>Method:</strong> Shake with ice; strain over crushed ice. Garnish with passion fruit seeds.</p>
+<div class="notes">
+<label class="small" for="cachaca-batida-maracuja-notes">Notes</label>
+<textarea id="cachaca-batida-maracuja-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-batida-limao" id="cachaca-batida-limao">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Batida de Limão (com Leite Condensado)</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 1 oz lime juice, 1–1½ oz sweetened condensed milk</p>
+<p class="method"><strong>Method:</strong> Shake very hard with ice to emulsify. Strain over crushed ice. Garnish with lime wheel.</p>
+<div class="notes">
+<label class="small" for="cachaca-batida-limao-notes">Notes</label>
+<textarea id="cachaca-batida-limao-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-batida-morango" id="cachaca-batida-morango">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Batida de Morango</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Blend/Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 4 strawberries, 1 oz sweetened condensed milk, ½ oz lime</p>
+<p class="method"><strong>Method:</strong> Muddle or blend berries with cachaça; shake with ice and condensed milk; pour over crushed ice. Strawberry slice.</p>
+<div class="notes">
+<label class="small" for="cachaca-batida-morango-notes">Notes</label>
+<textarea id="cachaca-batida-morango-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-batida-goiaba" id="cachaca-batida-goiaba">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Batida de Goiaba</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 2 oz guava nectar, 1 oz sweetened condensed milk</p>
+<p class="method"><strong>Method:</strong> Shake with ice; strain over crushed ice. Lime wedge.</p>
+<div class="notes">
+<label class="small" for="cachaca-batida-goiaba-notes">Notes</label>
+<textarea id="cachaca-batida-goiaba-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-rabo-de-galo" id="cachaca-rabo-de-galo">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Rabo de Galo</h3>
+<div class="meta">
+<span class="tag">Glass: Old Fashioned</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 1 oz sweet vermouth, ¼ oz Cynar (optional)</p>
+<p class="method"><strong>Method:</strong> Stir with ice until very cold; strain over a large cube. Express orange peel.</p>
+<div class="notes">
+<label class="small" for="cachaca-rabo-de-galo-notes">Notes</label>
+<textarea id="cachaca-rabo-de-galo-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-banzeiro" id="cachaca-banzeiro">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Banzeiro</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz cachaça, 1 oz passion fruit, ½ oz lime, ½ oz honey syrup, pinch salt</p>
+<p class="method"><strong>Method:</strong> Shake with ice 10–12 sec; strain over fresh ice. Garnish with lime wheel.</p>
+<div class="notes">
+<label class="small" for="cachaca-banzeiro-notes">Notes</label>
+<textarea id="cachaca-banzeiro-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-caju-amigo" id="cachaca-caju-amigo">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Caju Amigo</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 3–4 oz fresh cashew (caju) juice, pinch salt</p>
+<p class="method"><strong>Method:</strong> Build in a chilled rocks glass over ice. Brief stir. Garnish with lime wedge.</p>
+<div class="notes">
+<label class="small" for="cachaca-caju-amigo-notes">Notes</label>
+<textarea id="cachaca-caju-amigo-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-macunaima" id="cachaca-macunaima">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Macunaíma</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, ½ oz simple, ½ oz lime, ¼ oz Fernet-Branca</p>
+<p class="method"><strong>Method:</strong> Shake all with ice; fine strain into a chilled coupe. Lime twist optional.</p>
+<div class="notes">
+<label class="small" for="cachaca-macunaima-notes">Notes</label>
+<textarea id="cachaca-macunaima-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-brazilian-buck" id="cachaca-brazilian-buck">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Brazilian Buck</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, ½ oz lime, ginger beer to top</p>
+<p class="method"><strong>Method:</strong> Build in highball over ice; top with ginger beer; brief stir. Garnish with lime.</p>
+<div class="notes">
+<label class="small" for="cachaca-brazilian-buck-notes">Notes</label>
+<textarea id="cachaca-brazilian-buck-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-collins" id="cachaca-collins">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Cachaça Collins</h3>
+<div class="meta">
+<span class="tag">Glass: Collins</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Top</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, ¾ oz lemon, ¾ oz simple, soda top</p>
+<p class="method"><strong>Method:</strong> Shake first three; strain into Collins over fresh ice; top with soda. Lemon wheel garnish.</p>
+<div class="notes">
+<label class="small" for="cachaca-collins-notes">Notes</label>
+<textarea id="cachaca-collins-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-sour" id="cachaca-sour">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Cachaça Sour</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, ¾ oz lemon, ¾ oz simple, egg white (optional)</p>
+<p class="method"><strong>Method:</strong> Dry shake; then shake with ice; double strain; bitters art or lemon zest.</p>
+<div class="notes">
+<label class="small" for="cachaca-sour-notes">Notes</label>
+<textarea id="cachaca-sour-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-quentao" id="cachaca-quentao">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Quentão (Hot Spiced Punch)</h3>
+<div class="meta">
+<span class="tag">Glass: Mug</span>
+<span class="tag">Ice: Serve Hot</span>
+<span class="tag">Simmer</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1 cup cachaça, 1 cup water, ½ cup sugar, 1 cinnamon stick, 2 cloves, ginger slices, orange peel</p>
+<p class="method"><strong>Method:</strong> Caramelize sugar lightly; add remaining ingredients; simmer 10–15 min; strain and serve hot.</p>
+<div class="notes">
+<label class="small" for="cachaca-quentao-notes">Notes</label>
+<textarea id="cachaca-quentao-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-ananas-batida" id="cachaca-ananas-batida">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Ananás Batida</h3>
+<div class="meta">
+<span class="tag">Glass: Hurricane</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Blend</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 2 oz pineapple, 1 oz coconut cream, ½ oz lime</p>
+<p class="method"><strong>Method:</strong> Blend with a heaping cup of crushed ice until slushy. Pour into hurricane. Pineapple wedge garnish.</p>
+<div class="notes">
+<label class="small" for="cachaca-ananas-batida-notes">Notes</label>
+<textarea id="cachaca-ananas-batida-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-leite-de-onca" id="cachaca-leite-de-onca">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Leite de Onça</h3>
+<div class="meta">
+<span class="tag">Glass: Small Rocks</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 2 oz milk, 1 oz sweetened condensed milk, pinch cinnamon</p>
+<p class="method"><strong>Method:</strong> Shake with ice until lightly foamed; strain over fresh ice; dust cinnamon.</p>
+<div class="notes">
+<label class="small" for="cachaca-leite-de-onca-notes">Notes</label>
+<textarea id="cachaca-leite-de-onca-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-strawberry-smash" id="cachaca-strawberry-smash">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Strawberry Cachaça Smash</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Muddle/Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, ¾ oz lemon, ¾ oz simple, 2 strawberries, 4 mint leaves</p>
+<p class="method"><strong>Method:</strong> Muddle strawberry with simple; add mint (press gently), lemon, cachaça; shake; dump over crushed ice. Mint garnish.</p>
+<div class="notes">
+<label class="small" for="cachaca-strawberry-smash-notes">Notes</label>
+<textarea id="cachaca-strawberry-smash-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-highball" id="cachaca-highball">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Cachaça Highball</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, chilled club soda</p>
+<p class="method"><strong>Method:</strong> Build over ice; top with very cold soda; gentle stir; expressed lime peel.</p>
+<div class="notes">
+<label class="small" for="cachaca-highball-notes">Notes</label>
+<textarea id="cachaca-highball-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-tropical-punch" id="cachaca-tropical-punch">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tropical Cachaça Punch</h3>
+<div class="meta">
+<span class="tag">Glass: Tall</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz cachaça, 1 oz lime, 2 oz pineapple, ½ oz grenadine</p>
+<p class="method"><strong>Method:</strong> Shake with ice; strain over crushed ice. Garnish with pineapple leaf.</p>
+<div class="notes">
+<label class="small" for="cachaca-tropical-punch-notes">Notes</label>
+<textarea id="cachaca-tropical-punch-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="cachaca-bossa-nova" id="cachaca-bossa-nova">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Bossa Nova</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz cachaça, 1 oz passion fruit, ½ oz lime, ½ oz simple</p>
+<p class="method"><strong>Method:</strong> Shake with ice; fine strain; lime wheel.</p>
+<div class="notes">
+<label class="small" for="cachaca-bossa-nova-notes">Notes</label>
+<textarea id="cachaca-bossa-nova-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+</div>
+</details><details class="spirit" id="spirit-tequila">
+<summary><span class="title">🔽 Tequila</span><span class="count small">22 drinks</span></summary>
+<div class="cocktails">
+<div class="cocktail" data-id="teq-margarita" id="teq-margarita">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Margarita</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz blanco tequila, 1 oz triple sec, ¾ oz lime, ½ oz agave</p>
+<p class="method"><strong>Method:</strong> Salt rim; shake with ice; strain over fresh ice; lime wheel.</p>
+<div class="notes">
+<label class="small" for="teq-margarita-notes">Notes</label>
+<textarea id="teq-margarita-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-tommys" id="teq-tommys">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tommy’s Margarita</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz blanco tequila, 1 oz lime, ½–¾ oz agave</p>
+<p class="method"><strong>Method:</strong> Shake; strain over fresh ice; lime wheel.</p>
+<div class="notes">
+<label class="small" for="teq-tommys-notes">Notes</label>
+<textarea id="teq-tommys-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-paloma" id="teq-paloma">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Paloma</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ½ oz lime, grapefruit soda top, pinch salt</p>
+<p class="method"><strong>Method:</strong> Build; brief stir; grapefruit wedge.</p>
+<div class="notes">
+<label class="small" for="teq-paloma-notes">Notes</label>
+<textarea id="teq-paloma-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-sunrise" id="teq-sunrise">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tequila Sunrise</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, 4 oz orange juice, ½ oz grenadine</p>
+<p class="method"><strong>Method:</strong> Build OJ + tequila over ice; sink grenadine; do not stir.</p>
+<div class="notes">
+<label class="small" for="teq-sunrise-notes">Notes</label>
+<textarea id="teq-sunrise-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-el-diablo" id="teq-el-diablo">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>El Diablo</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz tequila, ½ oz crème de cassis, ½ oz lime, ginger beer top</p>
+<p class="method"><strong>Method:</strong> Build; stir once; top ginger beer; lime wedge.</p>
+<div class="notes">
+<label class="small" for="teq-el-diablo-notes">Notes</label>
+<textarea id="teq-el-diablo-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-mule" id="teq-mule">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Mexican Mule</h3>
+<div class="meta">
+<span class="tag">Glass: Copper Mug</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ½ oz lime, ginger beer top</p>
+<p class="method"><strong>Method:</strong> Build in mug over ice; brief stir; lime wheel.</p>
+<div class="notes">
+<label class="small" for="teq-mule-notes">Notes</label>
+<textarea id="teq-mule-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-old-fashioned" id="teq-old-fashioned">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tequila Old Fashioned</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz reposado tequila, ¼ oz agave, 2 dashes Angostura</p>
+<p class="method"><strong>Method:</strong> Stir with ice; strain over a large cube; orange peel.</p>
+<div class="notes">
+<label class="small" for="teq-old-fashioned-notes">Notes</label>
+<textarea id="teq-old-fashioned-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-matador" id="teq-matador">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Matador</h3>
+<div class="meta">
+<span class="tag">Glass: Cocktail</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, 1 oz lime, 2 oz pineapple</p>
+<p class="method"><strong>Method:</strong> Shake with ice; fine strain; pineapple leaf.</p>
+<div class="notes">
+<label class="small" for="teq-matador-notes">Notes</label>
+<textarea id="teq-matador-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-batanga" id="teq-batanga">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Batanga</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ½ oz lime, cola to top, pinch salt</p>
+<p class="method"><strong>Method:</strong> (Optional) salt rim. Build over ice; brief stir; lime wedge.</p>
+<div class="notes">
+<label class="small" for="teq-batanga-notes">Notes</label>
+<textarea id="teq-batanga-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-ranch-water" id="teq-ranch-water">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Ranch Water</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, 1 oz lime, Topo Chico/soda top</p>
+<p class="method"><strong>Method:</strong> Build; top; gentle stir; lime wedge.</p>
+<div class="notes">
+<label class="small" for="teq-ranch-water-notes">Notes</label>
+<textarea id="teq-ranch-water-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-cantarito" id="teq-cantarito">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Cantarito</h3>
+<div class="meta">
+<span class="tag">Glass: Jarrito/Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ½ oz each lime/orange/grapefruit, pinch salt, soda top</p>
+<p class="method"><strong>Method:</strong> Add citrus + tequila + salt; fill with ice; top with soda; stir.</p>
+<div class="notes">
+<label class="small" for="teq-cantarito-notes">Notes</label>
+<textarea id="teq-cantarito-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-juan-collins" id="teq-juan-collins">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Juan Collins</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ¾ oz lemon, ¾ oz simple, soda top</p>
+<p class="method"><strong>Method:</strong> Build; top; gentle stir; lemon wheel.</p>
+<div class="notes">
+<label class="small" for="teq-juan-collins-notes">Notes</label>
+<textarea id="teq-juan-collins-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-rosita" id="teq-rosita">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Rosita</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz tequila, ½ oz sweet vermouth, ½ oz dry vermouth, ¼ oz Campari, dash Angostura</p>
+<p class="method"><strong>Method:</strong> Stir very cold; strain; orange peel.</p>
+<div class="notes">
+<label class="small" for="teq-rosita-notes">Notes</label>
+<textarea id="teq-rosita-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-siesta" id="teq-siesta">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Siesta</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz tequila, ¾ oz grapefruit, ½ oz lime, ½ oz Campari, ½ oz simple</p>
+<p class="method"><strong>Method:</strong> Shake; fine strain; grapefruit twist.</p>
+<div class="notes">
+<label class="small" for="teq-siesta-notes">Notes</label>
+<textarea id="teq-siesta-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-brave-bull" id="teq-brave-bull">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Brave Bull</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, 1 oz coffee liqueur</p>
+<p class="method"><strong>Method:</strong> Build over a large cube; brief stir.</p>
+<div class="notes">
+<label class="small" for="teq-brave-bull-notes">Notes</label>
+<textarea id="teq-brave-bull-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-sour" id="teq-sour">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tequila Sour</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ¾ oz lemon, ¾ oz simple, egg white (optional)</p>
+<p class="method"><strong>Method:</strong> Dry shake; then with ice; double strain; bitters garnish.</p>
+<div class="notes">
+<label class="small" for="teq-sour-notes">Notes</label>
+<textarea id="teq-sour-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-gimlet" id="teq-gimlet">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tequila Gimlet</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ¾ oz lime cordial (or ¾ oz lime + ½ oz simple)</p>
+<p class="method"><strong>Method:</strong> Shake; fine strain; lime coin.</p>
+<div class="notes">
+<label class="small" for="teq-gimlet-notes">Notes</label>
+<textarea id="teq-gimlet-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-palomita" id="teq-palomita">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Palomita Fresca</h3>
+<div class="meta">
+<span class="tag">Glass: Collins</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Top</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1¾ oz tequila, 1 oz grapefruit, ¼ oz lime, ¼ oz agave, soda top</p>
+<p class="method"><strong>Method:</strong> Shake all but soda; strain over fresh ice; top with soda.</p>
+<div class="notes">
+<label class="small" for="teq-palomita-notes">Notes</label>
+<textarea id="teq-palomita-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-tegroni" id="teq-tegroni">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tegroni</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1 oz tequila, 1 oz Campari, 1 oz sweet vermouth</p>
+<p class="method"><strong>Method:</strong> Stir; strain over large cube; orange peel.</p>
+<div class="notes">
+<label class="small" for="teq-tegroni-notes">Notes</label>
+<textarea id="teq-tegroni-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-eastside" id="teq-eastside">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tequila Eastside</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, ¾ oz lime, ¾ oz simple, 3 cucumber slices, 6 mint leaves</p>
+<p class="method"><strong>Method:</strong> Muddle cucumber lightly; shake all with ice; fine strain; mint leaf garnish.</p>
+<div class="notes">
+<label class="small" for="teq-eastside-notes">Notes</label>
+<textarea id="teq-eastside-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-horchata-fizz" id="teq-horchata-fizz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tequila Horchata Fizz</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Top</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz tequila, 2 oz horchata (with sweetened condensed milk), ½ oz lime, soda top, pinch cinnamon</p>
+<p class="method"><strong>Method:</strong> Shake tequila, horchata, lime with ice; strain over fresh ice; top with soda; dust cinnamon.</p>
+<div class="notes">
+<label class="small" for="teq-horchata-fizz-notes">Notes</label>
+<textarea id="teq-horchata-fizz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="teq-mango-batida" id="teq-mango-batida">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tequila Mango Batida</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake/Blend</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz tequila, 2 oz mango nectar, 1 oz sweetened condensed milk, ½ oz lime</p>
+<p class="method"><strong>Method:</strong> Shake or blend; pour over crushed ice; lime wheel.</p>
+<div class="notes">
+<label class="small" for="teq-mango-batida-notes">Notes</label>
+<textarea id="teq-mango-batida-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+</div>
+</details><details class="spirit" id="spirit-triplesec">
+<summary><span class="title">🔽 Triple Sec (Base-Forward)</span><span class="count small">13 drinks</span></summary>
+<div class="cocktails">
+<div class="cocktail" data-id="ts-cointreau-fizz" id="ts-cointreau-fizz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Cointreau Fizz</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, ¾ oz lime, soda top</p>
+<p class="method"><strong>Method:</strong> Build over ice; brief stir; lime wheel.</p>
+<div class="notes">
+<label class="small" for="ts-cointreau-fizz-notes">Notes</label>
+<textarea id="ts-cointreau-fizz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-orange-sour" id="ts-orange-sour">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Orange Liqueur Sour</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, ¾ oz lemon, ¼–½ oz simple, egg white (optional)</p>
+<p class="method"><strong>Method:</strong> Dry shake; then with ice; double strain; orange zest.</p>
+<div class="notes">
+<label class="small" for="ts-orange-sour-notes">Notes</label>
+<textarea id="ts-orange-sour-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-spritz" id="ts-spritz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Triple Sec Spritz</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 3 oz sparkling wine, 1½ oz triple sec, splash soda</p>
+<p class="method"><strong>Method:</strong> Build: wine, triple sec, splash soda; gentle stir.</p>
+<div class="notes">
+<label class="small" for="ts-spritz-notes">Notes</label>
+<textarea id="ts-spritz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-rickey" id="ts-rickey">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Triple Sec Rickey</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, 1 oz lime, soda top</p>
+<p class="method"><strong>Method:</strong> Build over ice; top with soda; lime wedge.</p>
+<div class="notes">
+<label class="small" for="ts-rickey-notes">Notes</label>
+<textarea id="ts-rickey-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-collins" id="ts-collins">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Orange Liqueur Collins</h3>
+<div class="meta">
+<span class="tag">Glass: Collins</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Top</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, ¾ oz lemon, ½ oz simple, soda top</p>
+<p class="method"><strong>Method:</strong> Shake first three; strain into Collins; top with soda.</p>
+<div class="notes">
+<label class="small" for="ts-collins-notes">Notes</label>
+<textarea id="ts-collins-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-old-fashioned" id="ts-old-fashioned">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Orange Old Fashioned</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, 1–2 dashes Angostura, orange peel</p>
+<p class="method"><strong>Method:</strong> Stir triple sec and bitters with ice; strain over a large cube; express orange peel.</p>
+<div class="notes">
+<label class="small" for="ts-old-fashioned-notes">Notes</label>
+<textarea id="ts-old-fashioned-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-salty-highball" id="ts-salty-highball">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Salty Orange Highball</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, pinch salt, soda top</p>
+<p class="method"><strong>Method:</strong> Build; pinch of salt; top soda; orange wheel.</p>
+<div class="notes">
+<label class="small" for="ts-salty-highball-notes">Notes</label>
+<textarea id="ts-salty-highball-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-gimlet" id="ts-gimlet">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Orange Gimlet</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, ¾ oz lime, ¼ oz simple</p>
+<p class="method"><strong>Method:</strong> Shake; fine strain; lime coin.</p>
+<div class="notes">
+<label class="small" for="ts-gimlet-notes">Notes</label>
+<textarea id="ts-gimlet-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-sour-bitters" id="ts-sour-bitters">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Bitters Orange Sour</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, ¾ oz lemon, 2 dashes Angostura</p>
+<p class="method"><strong>Method:</strong> Dry shake; then with ice; double strain; orange peel.</p>
+<div class="notes">
+<label class="small" for="ts-sour-bitters-notes">Notes</label>
+<textarea id="ts-sour-bitters-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-tonic" id="ts-tonic">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Triple Sec &amp; Tonic</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, tonic top</p>
+<p class="method"><strong>Method:</strong> Build over ice; gentle stir; orange slice.</p>
+<div class="notes">
+<label class="small" for="ts-tonic-notes">Notes</label>
+<textarea id="ts-tonic-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-shandy" id="ts-shandy">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Orange Shandy</h3>
+<div class="meta">
+<span class="tag">Glass: Pint</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 8 oz lager, 1½ oz triple sec, ½ oz lemon</p>
+<p class="method"><strong>Method:</strong> Build in chilled pint; gentle stir.</p>
+<div class="notes">
+<label class="small" for="ts-shandy-notes">Notes</label>
+<textarea id="ts-shandy-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-spritzer" id="ts-spritzer">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Orange Spritzer</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, 3 oz white wine, splash soda</p>
+<p class="method"><strong>Method:</strong> Build; gentle stir; orange twist.</p>
+<div class="notes">
+<label class="small" for="ts-spritzer-notes">Notes</label>
+<textarea id="ts-spritzer-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ts-creamsicle-batida" id="ts-creamsicle-batida">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Orange Creamsicle Batida</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake/Blend</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz triple sec, 2 oz orange juice, 1 oz sweetened condensed milk</p>
+<p class="method"><strong>Method:</strong> Shake or blend until creamy; pour over crushed ice; orange wheel.</p>
+<div class="notes">
+<label class="small" for="ts-creamsicle-batida-notes">Notes</label>
+<textarea id="ts-creamsicle-batida-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+</div>
+</details><details class="spirit" id="spirit-jameson">
+<summary><span class="title">🔽 Jameson (Irish Whiskey)</span><span class="count small">23 drinks</span></summary>
+<div class="cocktails">
+<div class="cocktail" data-id="jw-irish-coffee" id="jw-irish-coffee">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Coffee</h3>
+<div class="meta">
+<span class="tag">Glass: Irish Coffee</span>
+<span class="tag">Ice: Hot</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, 1 tsp sugar, 4 oz hot coffee, lightly whipped cream</p>
+<p class="method"><strong>Method:</strong> Warm glass; build; stir to dissolve; float cream.</p>
+<div class="notes">
+<label class="small" for="jw-irish-coffee-notes">Notes</label>
+<textarea id="jw-irish-coffee-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-irish-viet-iced" id="jw-irish-viet-iced">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Iced Irish Vietnamese Coffee</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, 2 oz strong coffee concentrate, 1–1½ oz sweetened condensed milk</p>
+<p class="method"><strong>Method:</strong> Stir coffee and condensed milk; add whiskey; pour over ice; stir. Optional pinch of salt.</p>
+<div class="notes">
+<label class="small" for="jw-irish-viet-iced-notes">Notes</label>
+<textarea id="jw-irish-viet-iced-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-sour" id="jw-sour">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Whiskey Sour (Irish)</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ¾ oz lemon, ¾ oz simple, egg white (optional)</p>
+<p class="method"><strong>Method:</strong> Dry shake; then with ice; double strain; bitters garnish.</p>
+<div class="notes">
+<label class="small" for="jw-sour-notes">Notes</label>
+<textarea id="jw-sour-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-old-fashioned" id="jw-old-fashioned">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Old Fashioned (Irish)</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ¼ oz simple, 2 dashes Angostura</p>
+<p class="method"><strong>Method:</strong> Stir; strain over large cube; express orange peel.</p>
+<div class="notes">
+<label class="small" for="jw-old-fashioned-notes">Notes</label>
+<textarea id="jw-old-fashioned-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-manhattan" id="jw-manhattan">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Manhattan</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, 1 oz sweet vermouth, 2 dashes Angostura</p>
+<p class="method"><strong>Method:</strong> Stir very cold; strain; cherry garnish.</p>
+<div class="notes">
+<label class="small" for="jw-manhattan-notes">Notes</label>
+<textarea id="jw-manhattan-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-emerald" id="jw-emerald">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Emerald</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Irish whiskey, 1 oz sweet vermouth, 2 dashes orange bitters</p>
+<p class="method"><strong>Method:</strong> Stir; strain; orange peel.</p>
+<div class="notes">
+<label class="small" for="jw-emerald-notes">Notes</label>
+<textarea id="jw-emerald-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-new-york-sour" id="jw-new-york-sour">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>New York Sour (Irish)</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Float</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ¾ oz lemon, ¾ oz simple, egg white (opt.), ½ oz dry red wine (float)</p>
+<p class="method"><strong>Method:</strong> Shake; strain over fresh ice; float wine; lemon peel.</p>
+<div class="notes">
+<label class="small" for="jw-new-york-sour-notes">Notes</label>
+<textarea id="jw-new-york-sour-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-smash" id="jw-smash">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Whiskey Smash</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Muddle/Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ¾ oz lemon, ¾ oz simple, 6–8 mint leaves</p>
+<p class="method"><strong>Method:</strong> Muddle mint lightly; shake with ice; dump over crushed ice.</p>
+<div class="notes">
+<label class="small" for="jw-smash-notes">Notes</label>
+<textarea id="jw-smash-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-gold-rush" id="jw-gold-rush">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Gold Rush (Irish)</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ¾ oz lemon, ¾ oz honey syrup</p>
+<p class="method"><strong>Method:</strong> Shake; strain over fresh ice; lemon peel.</p>
+<div class="notes">
+<label class="small" for="jw-gold-rush-notes">Notes</label>
+<textarea id="jw-gold-rush-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-irish-ale" id="jw-irish-ale">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Ale</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ginger ale top, 2 dashes Angostura (opt.)</p>
+<p class="method"><strong>Method:</strong> Build; top; stir; lime wedge.</p>
+<div class="notes">
+<label class="small" for="jw-irish-ale-notes">Notes</label>
+<textarea id="jw-irish-ale-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-tipperary" id="jw-tipperary">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Tipperary</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Irish whiskey, 1 oz sweet vermouth, ¼ oz green Chartreuse</p>
+<p class="method"><strong>Method:</strong> Stir very cold; strain; orange peel.</p>
+<div class="notes">
+<label class="small" for="jw-tipperary-notes">Notes</label>
+<textarea id="jw-tipperary-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-godfather" id="jw-godfather">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Godfather</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ½ oz amaretto</p>
+<p class="method"><strong>Method:</strong> Build over a large cube; brief stir; orange peel optional.</p>
+<div class="notes">
+<label class="small" for="jw-godfather-notes">Notes</label>
+<textarea id="jw-godfather-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-boulevardier-irish" id="jw-boulevardier-irish">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Boulevardier</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe/Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1 oz Jameson, 1 oz Campari, 1 oz sweet vermouth</p>
+<p class="method"><strong>Method:</strong> Stir very cold; serve up or over a large cube; orange peel.</p>
+<div class="notes">
+<label class="small" for="jw-boulevardier-irish-notes">Notes</label>
+<textarea id="jw-boulevardier-irish-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-buck" id="jw-buck">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Buck</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ½ oz lime, ginger ale/beer top</p>
+<p class="method"><strong>Method:</strong> Build; top; brief stir; lime wedge.</p>
+<div class="notes">
+<label class="small" for="jw-buck-notes">Notes</label>
+<textarea id="jw-buck-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-spritz" id="jw-spritz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Whiskey Spritz</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz Jameson, 3 oz dry sparkling wine, splash soda</p>
+<p class="method"><strong>Method:</strong> Build; wine first; then whiskey; splash soda; lemon twist.</p>
+<div class="notes">
+<label class="small" for="jw-spritz-notes">Notes</label>
+<textarea id="jw-spritz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-black-thorn" id="jw-black-thorn">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Black Thorn (Irish)</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Irish whiskey, ¾ oz dry vermouth, ¼ oz sweet vermouth, 2 dashes bitters</p>
+<p class="method"><strong>Method:</strong> Stir; strain; lemon twist.</p>
+<div class="notes">
+<label class="small" for="jw-black-thorn-notes">Notes</label>
+<textarea id="jw-black-thorn-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-paddy" id="jw-paddy">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Paddy Cocktail</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Irish whiskey, 1 oz sweet vermouth, 2 dashes bitters</p>
+<p class="method"><strong>Method:</strong> Stir very cold; strain; cherry garnish.</p>
+<div class="notes">
+<label class="small" for="jw-paddy-notes">Notes</label>
+<textarea id="jw-paddy-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-green-irish" id="jw-green-irish">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Green Irish</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Irish whiskey, ¼ oz green crème de menthe</p>
+<p class="method"><strong>Method:</strong> Build over a large cube; brief stir; mint sprig.</p>
+<div class="notes">
+<label class="small" for="jw-green-irish-notes">Notes</label>
+<textarea id="jw-green-irish-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-irish-mai-tai" id="jw-irish-mai-tai">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Mai Tai (riff)</h3>
+<div class="meta">
+<span class="tag">Glass: Double Rocks</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Irish whiskey, ¾ oz lime, ½ oz orgeat, ½ oz orange curaçao</p>
+<p class="method"><strong>Method:</strong> Shake; pour over crushed ice; mint bouquet and lime shell.</p>
+<div class="notes">
+<label class="small" for="jw-irish-mai-tai-notes">Notes</label>
+<textarea id="jw-irish-mai-tai-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-apple-mule" id="jw-apple-mule">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Apple Mule</h3>
+<div class="meta">
+<span class="tag">Glass: Copper Mug</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz Jameson, 1 oz cloudy apple juice, ½ oz lime, ginger beer top</p>
+<p class="method"><strong>Method:</strong> Build; top; stir; apple fan garnish.</p>
+<div class="notes">
+<label class="small" for="jw-apple-mule-notes">Notes</label>
+<textarea id="jw-apple-mule-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-highball" id="jw-highball">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Highball</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, very cold soda water</p>
+<p class="method"><strong>Method:</strong> Build over plenty of ice; quick stir; lemon peel (optional).</p>
+<div class="notes">
+<label class="small" for="jw-highball-notes">Notes</label>
+<textarea id="jw-highball-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-hot-toddy" id="jw-hot-toddy">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Hot Toddy (Irish)</h3>
+<div class="meta">
+<span class="tag">Glass: Mug</span>
+<span class="tag">Ice: Hot</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Jameson, ½ oz honey, ½ oz lemon, hot water to fill</p>
+<p class="method"><strong>Method:</strong> Preheat mug; build; stir; lemon wheel and clove (optional).</p>
+<div class="notes">
+<label class="small" for="jw-hot-toddy-notes">Notes</label>
+<textarea id="jw-hot-toddy-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="jw-condensed-flip" id="jw-condensed-flip">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Irish Condensed Milk Flip</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz Jameson, ¾ oz sweetened condensed milk, 1 whole egg, pinch nutmeg</p>
+<p class="method"><strong>Method:</strong> Dry shake hard; then with ice; double strain; grate nutmeg on top.</p>
+<div class="notes">
+<label class="small" for="jw-condensed-flip-notes">Notes</label>
+<textarea id="jw-condensed-flip-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+</div>
+</details><details class="spirit" id="spirit-aperol">
+<summary><span class="title">🔽 Aperol (Aperol-Forward)</span><span class="count small">15 drinks</span></summary>
+<div class="cocktails">
+<div class="cocktail" data-id="ap-spritz" id="ap-spritz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Spritz</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 3 oz Prosecco, 2 oz Aperol, splash soda</p>
+<p class="method"><strong>Method:</strong> Build in wine glass: Prosecco, Aperol, splash soda; gentle stir; orange slice.</p>
+<div class="notes">
+<label class="small" for="ap-spritz-notes">Notes</label>
+<textarea id="ap-spritz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-americano" id="ap-americano">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Americano</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz Aperol, 1½ oz sweet vermouth, soda top</p>
+<p class="method"><strong>Method:</strong> Build; top with soda; stir; orange slice.</p>
+<div class="notes">
+<label class="small" for="ap-americano-notes">Notes</label>
+<textarea id="ap-americano-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-venetian" id="ap-venetian">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Venetian Spritz (Bianco)</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 3 oz dry white wine, 2 oz Aperol, splash soda</p>
+<p class="method"><strong>Method:</strong> Build; wine first; then Aperol; splash soda; lemon twist.</p>
+<div class="notes">
+<label class="small" for="ap-venetian-notes">Notes</label>
+<textarea id="ap-venetian-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-tonic" id="ap-tonic">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Tonic</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Aperol, tonic water to top</p>
+<p class="method"><strong>Method:</strong> Build over ice; brief stir; orange slice.</p>
+<div class="notes">
+<label class="small" for="ap-tonic-notes">Notes</label>
+<textarea id="ap-tonic-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-fizz" id="ap-fizz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Fizz</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Top</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Aperol, ¾ oz lemon, ½ oz simple, soda top</p>
+<p class="method"><strong>Method:</strong> Shake first three; strain; top with soda; lemon wheel.</p>
+<div class="notes">
+<label class="small" for="ap-fizz-notes">Notes</label>
+<textarea id="ap-fizz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-bicicletta" id="ap-bicicletta">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Bicicletta (Aperol)</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 3 oz dry white wine, 2 oz Aperol, splash soda</p>
+<p class="method"><strong>Method:</strong> Build; gentle stir; lemon twist or orange slice.</p>
+<div class="notes">
+<label class="small" for="ap-bicicletta-notes">Notes</label>
+<textarea id="ap-bicicletta-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-sbagliato-aperol" id="ap-sbagliato-aperol">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Sbagliato (Aperol)</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks/Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1 oz Aperol, 1 oz sweet vermouth, 3 oz sparkling wine</p>
+<p class="method"><strong>Method:</strong> Build over ice; top with sparkling wine; orange twist.</p>
+<div class="notes">
+<label class="small" for="ap-sbagliato-aperol-notes">Notes</label>
+<textarea id="ap-sbagliato-aperol-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-collins" id="ap-collins">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Collins</h3>
+<div class="meta">
+<span class="tag">Glass: Collins</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Top</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Aperol, ¾ oz lemon, ½ oz simple, soda top</p>
+<p class="method"><strong>Method:</strong> Shake; strain; top with soda; lemon wheel.</p>
+<div class="notes">
+<label class="small" for="ap-collins-notes">Notes</label>
+<textarea id="ap-collins-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-shandy" id="ap-shandy">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Shandy</h3>
+<div class="meta">
+<span class="tag">Glass: Pint</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 8 oz lager, 1½ oz Aperol, ½ oz lemon</p>
+<p class="method"><strong>Method:</strong> Build in chilled pint; gentle stir.</p>
+<div class="notes">
+<label class="small" for="ap-shandy-notes">Notes</label>
+<textarea id="ap-shandy-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-sour-forward" id="ap-sour-forward">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Sour (Forward)</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Aperol, ¾ oz lemon, ¼–½ oz simple, egg white (opt.)</p>
+<p class="method"><strong>Method:</strong> Dry shake; then with ice; double strain; orange zest.</p>
+<div class="notes">
+<label class="small" for="ap-sour-forward-notes">Notes</label>
+<textarea id="ap-sour-forward-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-soda" id="ap-soda">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol &amp; Soda</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Aperol, soda water to top</p>
+<p class="method"><strong>Method:</strong> Build in highball; top with soda; orange slice.</p>
+<div class="notes">
+<label class="small" for="ap-soda-notes">Notes</label>
+<textarea id="ap-soda-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-tonic-grapefruit" id="ap-tonic-grapefruit">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Grapefruit Tonic</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz Aperol, 2 oz pink grapefruit juice, tonic to top</p>
+<p class="method"><strong>Method:</strong> Build over ice; stir once; grapefruit wheel.</p>
+<div class="notes">
+<label class="small" for="ap-tonic-grapefruit-notes">Notes</label>
+<textarea id="ap-tonic-grapefruit-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-spritz-rosato" id="ap-spritz-rosato">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Rosato Spritz</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 3 oz rosé wine, 1½ oz Aperol, splash soda</p>
+<p class="method"><strong>Method:</strong> Build; gentle stir; strawberry slice optional.</p>
+<div class="notes">
+<label class="small" for="ap-spritz-rosato-notes">Notes</label>
+<textarea id="ap-spritz-rosato-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-ginger-highball" id="ap-ginger-highball">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Ginger Highball</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz Aperol, ginger ale to top</p>
+<p class="method"><strong>Method:</strong> Build over ice; top with ginger ale; orange wheel.</p>
+<div class="notes">
+<label class="small" for="ap-ginger-highball-notes">Notes</label>
+<textarea id="ap-ginger-highball-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="ap-orange-cream-fizz" id="ap-orange-cream-fizz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Aperol Orange Cream Fizz (modern)</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Shake/Top</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz Aperol, 2 oz orange juice, 1 oz sweetened condensed milk, soda to top</p>
+<p class="method"><strong>Method:</strong> Shake Aperol, orange, condensed milk hard with ice; strain over fresh ice; top with soda; gentle stir.</p>
+<div class="notes">
+<label class="small" for="ap-orange-cream-fizz-notes">Notes</label>
+<textarea id="ap-orange-cream-fizz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+</div>
+</details><details class="spirit" id="spirit-sweetvermouth">
+<summary><span class="title">🔽 Sweet Vermouth (Vermouth-Forward)</span><span class="count small">15 drinks</span></summary>
+<div class="cocktails">
+<div class="cocktail" data-id="sv-vermouth-cocktail" id="sv-vermouth-cocktail">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth Cocktail (Rosso)</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2½ oz sweet vermouth, 2 dashes bitters, lemon twist</p>
+<p class="method"><strong>Method:</strong> Stir very cold; strain; lemon twist.</p>
+<div class="notes">
+<label class="small" for="sv-vermouth-cocktail-notes">Notes</label>
+<textarea id="sv-vermouth-cocktail-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-adonis" id="sv-adonis">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Adonis</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz dry sherry, 1½ oz sweet vermouth, 2 dashes orange bitters</p>
+<p class="method"><strong>Method:</strong> Stir; strain; orange peel.</p>
+<div class="notes">
+<label class="small" for="sv-adonis-notes">Notes</label>
+<textarea id="sv-adonis-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-americano-rosso" id="sv-americano-rosso">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Americano Rosso</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz sweet vermouth, 1½ oz red bitter, soda top</p>
+<p class="method"><strong>Method:</strong> Build; top with soda; gentle stir; orange slice.</p>
+<div class="notes">
+<label class="small" for="sv-americano-rosso-notes">Notes</label>
+<textarea id="sv-americano-rosso-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-sbagliato-rosso" id="sv-sbagliato-rosso">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Sbagliato Rosso</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks/Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz sweet vermouth, 1 oz red bitter, 3 oz sparkling wine</p>
+<p class="method"><strong>Method:</strong> Build; top; gentle stir; orange twist.</p>
+<div class="notes">
+<label class="small" for="sv-sbagliato-rosso-notes">Notes</label>
+<textarea id="sv-sbagliato-rosso-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-tonic" id="sv-tonic">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth &amp; Tonic (Rosso)</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, tonic to top</p>
+<p class="method"><strong>Method:</strong> Build; top; orange slice.</p>
+<div class="notes">
+<label class="small" for="sv-tonic-notes">Notes</label>
+<textarea id="sv-tonic-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-highball-ginger" id="sv-highball-ginger">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth Highball (Ginger)</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, ginger ale top</p>
+<p class="method"><strong>Method:</strong> Build over ice; top with ginger ale; lemon wedge.</p>
+<div class="notes">
+<label class="small" for="sv-highball-ginger-notes">Notes</label>
+<textarea id="sv-highball-ginger-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-cobbler" id="sv-cobbler">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth Cobbler</h3>
+<div class="meta">
+<span class="tag">Glass: Collins</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 3 oz sweet vermouth, ¼ oz simple, seasonal fruit</p>
+<p class="method"><strong>Method:</strong> Build over crushed ice; swizzle lightly; garnish berries + mint.</p>
+<div class="notes">
+<label class="small" for="sv-cobbler-notes">Notes</label>
+<textarea id="sv-cobbler-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-spritz" id="sv-spritz">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth Spritz (Rosso)</h3>
+<div class="meta">
+<span class="tag">Glass: Wine</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, 3 oz sparkling wine, splash soda</p>
+<p class="method"><strong>Method:</strong> Build; top; orange peel.</p>
+<div class="notes">
+<label class="small" for="sv-spritz-notes">Notes</label>
+<textarea id="sv-spritz-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-shaken" id="sv-shaken">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Shaken Vermouth (Rosso)</h3>
+<div class="meta">
+<span class="tag">Glass: Nick &amp; Nora</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2½ oz sweet vermouth, 2 dashes bitters</p>
+<p class="method"><strong>Method:</strong> Shake hard with ice to aerate; fine strain; lemon twist.</p>
+<div class="notes">
+<label class="small" for="sv-shaken-notes">Notes</label>
+<textarea id="sv-shaken-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-sour" id="sv-sour">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth Sour (Rosso)</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, ¾ oz lemon, ¼–½ oz simple, egg white (opt.)</p>
+<p class="method"><strong>Method:</strong> Dry shake; then with ice; double strain; bitters art.</p>
+<div class="notes">
+<label class="small" for="sv-sour-notes">Notes</label>
+<textarea id="sv-sour-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-negroni-bianco-rosso" id="sv-negroni-bianco-rosso">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Rosso Bianco Negroni (Low-ABV)</h3>
+<div class="meta">
+<span class="tag">Glass: Rocks</span>
+<span class="tag">Ice: Large Cube</span>
+<span class="tag">Stir</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 1½ oz sweet vermouth, 1 oz dry vermouth, ½ oz red bitter</p>
+<p class="method"><strong>Method:</strong> Stir; strain over large cube; orange peel.</p>
+<div class="notes">
+<label class="small" for="sv-negroni-bianco-rosso-notes">Notes</label>
+<textarea id="sv-negroni-bianco-rosso-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-orange-tonic" id="sv-orange-tonic">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Rosso Orange Tonic</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, ½ oz fresh orange juice, tonic to top</p>
+<p class="method"><strong>Method:</strong> Build; brief stir; orange wheel.</p>
+<div class="notes">
+<label class="small" for="sv-orange-tonic-notes">Notes</label>
+<textarea id="sv-orange-tonic-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-vermouth-limonata" id="sv-vermouth-limonata">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth Limonata</h3>
+<div class="meta">
+<span class="tag">Glass: Highball</span>
+<span class="tag">Ice: Cubes</span>
+<span class="tag">Build</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, 3 oz San Pellegrino Limonata</p>
+<p class="method"><strong>Method:</strong> Build over ice; gentle stir; lemon wheel.</p>
+<div class="notes">
+<label class="small" for="sv-vermouth-limonata-notes">Notes</label>
+<textarea id="sv-vermouth-limonata-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-flip" id="sv-flip">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Vermouth Flip (Rosso)</h3>
+<div class="meta">
+<span class="tag">Glass: Coupe</span>
+<span class="tag">Ice: —</span>
+<span class="tag">Dry Shake + Shake</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, ¼ oz simple, 1 whole egg, nutmeg</p>
+<p class="method"><strong>Method:</strong> Dry shake; then with ice; double strain; grate nutmeg.</p>
+<div class="notes">
+<label class="small" for="sv-flip-notes">Notes</label>
+<textarea id="sv-flip-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+<div class="cocktail" data-id="sv-rosso-condensed-cobbler" id="sv-rosso-condensed-cobbler">
+<div class="trybox"><input aria-label="Tried" type="checkbox"/></div>
+<div class="entry">
+<h3>Rosso Condensed Milk Cobbler (low-ABV)</h3>
+<div class="meta">
+<span class="tag">Glass: Collins</span>
+<span class="tag">Ice: Crushed</span>
+<span class="tag">Shake/Swizzle</span>
+</div>
+<p class="ing"><strong>Ingredients:</strong> 2 oz sweet vermouth, 1 oz sweetened condensed milk, ½ oz orange juice, crushed berries (optional)</p>
+<p class="method"><strong>Method:</strong> Shake vermouth, condensed milk, orange quickly with ice; pour over crushed ice; swizzle; garnish berries + mint.</p>
+<div class="notes">
+<label class="small" for="sv-rosso-condensed-cobbler-notes">Notes</label>
+<textarea id="sv-rosso-condensed-cobbler-notes" placeholder="Add notes…"></textarea>
+</div>
+<div class="actions"><button class="delete">Delete</button></div>
+</div>
+</div>
+</div>
+</details>
+<footer>Made for Diogo • Notes + Condensed Milk Additions • Base-only.</footer>
+</div>
+<script>
+(function(){
+  const triedKey = 'cocktails_tried_v2_grand';
+  const hiddenKey = 'cocktails_hidden_v2_grand';
+  const notesKey = 'cocktail_notes_v2_grand';
+  const getStore = (k) => JSON.parse(localStorage.getItem(k) || '{}');
+  const setStore = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+  let tried = getStore(triedKey);
+  let hidden = getStore(hiddenKey);
+  let notes = getStore(notesKey);
+
+  document.querySelectorAll('.cocktail').forEach(item => {
+    const id = item.dataset.id;
+
+    // Tried checkbox
+    const cb = item.querySelector('input[type="checkbox"]');
+    if (cb && tried[id]) cb.checked = true;
+    if (cb){
+      cb.addEventListener('change', () => { tried[id] = cb.checked; setStore(triedKey, tried); });
+    }
+
+    // Deleted/hidden
+    if (hidden[id]) item.style.display = 'none';
+    const delBtn = item.querySelector('.delete');
+    if (delBtn){
+      delBtn.addEventListener('click', () => { item.style.display = 'none'; hidden[id] = true; setStore(hiddenKey, hidden); });
+    }
+
+    // Notes
+    const ta = item.querySelector('textarea');
+    if (ta){
+      if (typeof notes[id] === 'string') ta.value = notes[id];
+      ta.addEventListener('input', () => {
+        notes[id] = ta.value;
+        setStore(notesKey, notes);
+      });
+    }
+  });
+
+  // Toolbar
+  document.getElementById('expandAll').addEventListener('click', () => {
+    document.querySelectorAll('details.spirit').forEach(d => d.open = true);
+  });
+  document.getElementById('collapseAll').addEventListener('click', () => {
+    document.querySelectorAll('details.spirit').forEach(d => d.open = false);
+  });
+  document.getElementById('resetTried').addEventListener('click', () => {
+    tried = {}; setStore(triedKey, tried);
+    document.querySelectorAll('.cocktail input[type="checkbox"]').forEach(cb => cb.checked = false);
+  });
+  document.getElementById('restoreAll').addEventListener('click', () => {
+    hidden = {}; setStore(hiddenKey, hidden);
+    document.querySelectorAll('.cocktail').forEach(item => item.style.display = '');
+  });
+
+  // Default collapsed; open hash target
+  document.querySelectorAll('details.spirit').forEach(d => d.open = false);
+  if(location.hash){
+    const el = document.querySelector(location.hash);
+    if(el && el.classList.contains('spirit')) el.open = true;
+  }
+})();
+</script>
+<script>
+(function(){
+  const STORAGE_KEY = "cocktail_book_v2_tried_v2";
+  const searchEl = document.getElementById("v2-search");
+  const triedCountEl = document.getElementById("v2-tried-count");
+  const triedEmptyEl = document.getElementById("v2-tried-empty");
+  const triedListEl = document.getElementById("v2-tried-list");
+  const clearBtn = document.getElementById("v2-clear-tried");
+  const showTriedBtn = document.getElementById("v2-show-tried");
+  const showAllBtn = document.getElementById("v2-show-all");
+  const visibleEl = document.getElementById("v2-visible");
+  const totalEl = document.getElementById("v2-total");
+
+  const getCocktails = () => Array.from(document.querySelectorAll(".cocktail[data-id]"));
+  const getTitle = (card) => (card.querySelector("h3, h4")?.textContent || card.dataset.id || "Untitled").trim();
+  const getTriedCheckbox = (card) => card.querySelector('input[type="checkbox"][aria-label="Tried"], input[type="checkbox"].tried-toggle, input[type="checkbox"][data-tried]');
+
+  const load = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; } };
+  const save = (obj) => localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+
+  let triedState = load();
+  let showOnlyTried = false;
+
+  function syncCheckboxesFromState(){
+    getCocktails().forEach(card => {
+      const id = card.dataset.id;
+      const cb = getTriedCheckbox(card);
+      if (cb) cb.checked = !!triedState[id];
+      // ensure anchor exists for linking
+      if (!card.id) card.id = id;
+    });
+  }
+
+  function buildTriedList(){
+    const cards = getCocktails();
+    const tried = cards
+      .filter(c => triedState[c.dataset.id])
+      .map(c => ({ id: c.dataset.id, name: getTitle(c) }))
+      .sort((a,b)=>a.name.localeCompare(b.name));
+
+    triedListEl.innerHTML = "";
+    triedCountEl.textContent = String(tried.length);
+    triedEmptyEl.style.display = tried.length ? "none" : "block";
+
+    tried.forEach(item=>{
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = "#" + item.id;
+      a.textContent = item.name;
+      li.appendChild(a);
+      triedListEl.appendChild(li);
+    });
+  }
+
+  function applyFilter(){
+    const q = (searchEl?.value || "").trim().toLowerCase();
+    const cards = getCocktails();
+    totalEl.textContent = String(cards.length);
+
+    let visible = 0;
+    cards.forEach(card=>{
+      const id = card.dataset.id;
+      const matchesSearch = !q || (card.textContent || "").toLowerCase().includes(q);
+      const matchesTried = !showOnlyTried || !!triedState[id];
+      const show = matchesSearch && matchesTried;
+      card.style.display = show ? "" : "none";
+      if (show) visible++;
+    });
+    visibleEl.textContent = String(visible);
+  }
+
+  // Event delegation: reacts even if the DOM changes due to your existing "delete" buttons.
+  document.addEventListener("change", (e)=>{
+    const t = e.target;
+    if (!(t instanceof HTMLInputElement)) return;
+    if (t.type !== "checkbox") return;
+    // only handle the Tried checkbox inside a cocktail card
+    if (t.getAttribute("aria-label") !== "Tried" && !t.classList.contains("tried-toggle") && !t.hasAttribute("data-tried")) return;
+
+    const card = t.closest(".cocktail[data-id]");
+    if (!card) return;
+    const id = card.dataset.id;
+    triedState[id] = !!t.checked;
+    save(triedState);
+    buildTriedList();
+    applyFilter();
+  });
+
+  searchEl?.addEventListener("input", ()=>{ applyFilter(); });
+
+  clearBtn?.addEventListener("click", ()=>{
+    const next = {};
+    triedState = next;
+    save(triedState);
+    syncCheckboxesFromState();
+    buildTriedList();
+    applyFilter();
+  });
+
+  showTriedBtn?.addEventListener("click", ()=>{
+    showOnlyTried = true;
+    applyFilter();
+  });
+
+  showAllBtn?.addEventListener("click", ()=>{
+    showOnlyTried = false;
+    applyFilter();
+  });
+
+  // Initial
+  syncCheckboxesFromState();
+  buildTriedList();
+  applyFilter();
+})();
+</script></body>
+</html>
