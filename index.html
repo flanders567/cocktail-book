@@ -42,6 +42,7 @@
   .delete:hover{border-color:var(--danger)}
   .small{font-size:.9rem;color:var(--muted)}
   footer{margin:24px 0 12px;color:var(--muted);font-size:.85rem;text-align:center}
+  
 </style>
 <style>
 /* --- V2 Modern UI (non-destructive) --- */
@@ -109,6 +110,34 @@ body{ background: var(--bg) !important; color: var(--text) !important; }
   box-shadow: var(--shadow) !important;
 }
 .cocktail h3{ margin-top: 0; }
+  /* ===== GLOBAL READABILITY FIX ===== */
+h1, h2, h3, summary {
+  color: #111 !important;
+  opacity: 1 !important;
+  font-weight: 600;
+}
+
+/* ===== REMOVE BLACK HIGHLIGHT TAGS ===== */
+.badge, .tag, span[class*="tag"], span[class*="pill"] {
+  background: #f1f3f5 !important;
+  color: #222 !important;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: none !important;
+}
+
+/* ===== NOTES FIELD FIX ===== */
+textarea {
+  background: #ffffff !important;
+  color: #111 !important;
+  border: 1px solid #dcdcdc !important;
+}
+
+/* ===== CARD POLISH ===== */
+article {
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
 </style></head>
 <body>
 <div id="v2-topbar">
